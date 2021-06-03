@@ -1,4 +1,4 @@
-#version 450 compatibility
+#version 120
 
 varying vec3 tintColor;
 

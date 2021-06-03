@@ -1,4 +1,4 @@
-#version 450 compatibility
+#version 120
 
 varying vec4 texcoord;
 
@@ -78,7 +78,7 @@ void main() {
     // color = convertToHDR(color);
     color = getExposure(color);
     color = burgess(color);
-    // vignette(color);
+    vignette(color);
 
     gl_FragColor = vec4(color, 1.0);
 }
