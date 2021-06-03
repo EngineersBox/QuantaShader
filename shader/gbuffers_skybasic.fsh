@@ -1,4 +1,4 @@
-#version 120
+#version 450 compatibility
 #extension GL_GOOGLE_include_directive: require
 
 #include "lib/framebuffer.glsl"

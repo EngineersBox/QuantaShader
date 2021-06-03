@@ -1,4 +1,4 @@
-#version 120
+#version 450 compatibility
 
 uniform int worldTime;
 uniform vec3 sunPosition;
