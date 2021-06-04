@@ -1,8 +1,8 @@
 #version 120
 
-varying vec4 texcoord;
+#include "lib/framebuffer.glsl"
 
-uniform sampler2D gcolor;
+varying vec4 texcoord;
 
 #define VIGNETTE_STRENGTH 1.0
 #define VIGNETTE_THRESHOLD 1.5142
@@ -33,7 +33,7 @@ vec3 getExposure(in vec3 color) {
     vec3 retColor;
 
     color *= 1.115;
-    retColor = pow(color, vec3(1.0 / 2.2));
+    retColor = pow(color, vec3(1 / 2.2));
 
     return retColor;
 }
@@ -44,9 +44,9 @@ vec3 reinhard(in vec3 color) {
 }
 
 vec3 burgess(in vec3 color) {
-    vec3 maxColor = max(vec3(0.0), color - 0.004);
+    vec3 maxColor = max(vec3(0.0), color - vec3(0.004));
     vec3 retColor = (maxColor * (6.2 * maxColor + 0.05)) / (maxColor * (6.2 * maxColor + 2.3) + 0.06);
-    return pow(retColor, vec3(1 / 2.2));;
+    return retColor;
 }
 
 float A = 0.15;
@@ -73,12 +73,14 @@ vec3 uc2Tonemap(in vec3 color) {
 }
 
 void main() {
-    vec3 color = texture2D(gcolor, texcoord.st).rgb;
+    vec3 color = getAlbedo(texcoord.st);
 
     // color = convertToHDR(color);
-    color = getExposure(color);
-    color = burgess(color);
-    vignette(color);
+    // color = getExposure(color);
+    // color = reinhard(color);
+    // color = burgess(color);
+    // color = uc2Tonemap(color);
+    // vignette(color);
 
     gl_FragColor = vec4(color, 1.0);
 }

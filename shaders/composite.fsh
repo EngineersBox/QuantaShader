@@ -5,7 +5,7 @@
 varying vec4 texcoord;
 varying vec3 lightVector;
 
-/* DRAWBUFFERS:012 */
+/* DRAWBUFFERS:01 */
 
 void main() {
     vec3 albedo = getAlbedo(texcoord.st);

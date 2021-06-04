@@ -2,12 +2,12 @@
 
 varying vec3 normal;
 varying vec3 tintColor;
-varying vec4 textcoord;
+varying vec4 texcoord;
 
 void main() {
     gl_Position = ftransform();
 
-    textcoord = gl_MultiTexCoord0;
+    texcoord = gl_MultiTexCoord0;
     tintColor = gl_Color.rgb;
     normal = normalize(gl_NormalMatrix * gl_Normal);
 }
