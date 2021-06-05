@@ -4,12 +4,12 @@
 
 varying vec3 normal;
 varying vec3 tintColor;
-varying vec4 texcoord;
+varying vec2 coord0;
 
 uniform sampler2D texture;
 
 void main() {
-    vec4 blockColor = texture2D(texture, texcoord.st);
+    vec4 blockColor = texture2D(texture, coord0);
     blockColor.rgb *= tintColor;
 
     GCOLOR_OUT = blockColor;
