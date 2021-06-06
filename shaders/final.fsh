@@ -3,23 +3,31 @@
 #include "lib/framebuffer.glsl"
 
 uniform sampler2D texture;
+uniform float viewWidth;
+uniform float viewHeight; 
 
 varying vec4 color;
 varying vec2 coord0;
 
-#define VIGNETTE_STRENGTH 1.0
-#define VIGNETTE_THRESHOLD 1.5142
+// Radius of the vignette, where 0.5 results in a circle fitting the screen [Default: 0.85]
+#define VIGNETTE_RADIUS 0.85
+// Softness of the vignette, between 0.0 and 1.0 [Default: 0.45]
+#define VIGNETTE_SOFTNESS 0.45
+// Opacity of the vignette between 0.0 and 1.0 [Default: 0.5]
+#define VIGNETTE_OPACITY 0.5
 
 #define HDR_OVER_EXPOSE_STRENGTH 1.2
 #define HDR_UNDER_EXPOSE_STRENGTH 1.5
 
 vec4 vignette(in vec4 c) {
-    float dist = distance(coord0, vec2(0.5)) * 2.0;
-    dist /= VIGNETTE_THRESHOLD;
-
-    dist = pow(dist, 1.1);
-
-    c.rgb *= (1.0 - dist) * VIGNETTE_STRENGTH;
+    //determine center position
+	vec2 center = (gl_FragCoord.xy / vec2(viewWidth, viewHeight)) - vec2(0.5);
+	
+	//use smoothstep to create a smooth vignette
+	float vignette = smoothstep(VIGNETTE_RADIUS, VIGNETTE_RADIUS - VIGNETTE_SOFTNESS, length(center));
+	
+	//apply the vignette with 50% opacity
+	c.rgb = mix(c.rgb, c.rgb * vignette, VIGNETTE_OPACITY);
     return c;
 }
 
@@ -36,7 +44,7 @@ vec4 convertToHDR(in vec4 color) {
 
 void main() {
     vec4 newcolor = color;
-    // newcolor = vignette(newcolor);
+    newcolor = vignette(newcolor);
 
     GCOLOR_OUT = newcolor * texture2D(texture, coord0);
 }
