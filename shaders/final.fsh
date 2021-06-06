@@ -20,13 +20,8 @@ varying vec2 coord0;
 #define HDR_UNDER_EXPOSE_STRENGTH 1.5
 
 vec4 vignette(in vec4 c) {
-    //determine center position
 	vec2 center = (gl_FragCoord.xy / vec2(viewWidth, viewHeight)) - vec2(0.5);
-	
-	//use smoothstep to create a smooth vignette
 	float vignette = smoothstep(VIGNETTE_RADIUS, VIGNETTE_RADIUS - VIGNETTE_SOFTNESS, length(center));
-	
-	//apply the vignette with 50% opacity
 	c.rgb = mix(c.rgb, c.rgb * vignette, VIGNETTE_OPACITY);
     return c;
 }
