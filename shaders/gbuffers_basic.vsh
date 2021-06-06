@@ -8,8 +8,7 @@ uniform mat4 gbufferModelViewInverse;
 //Pass vertex information to fragment shader.
 varying vec4 color;
 
-void main()
-{
+void main() {
     //Calculate world space position.
     vec3 pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
     pos = (gbufferModelViewInverse * vec4(pos,1)).xyz;

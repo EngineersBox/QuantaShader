@@ -1,6 +1,8 @@
 //Declare GL version.
 #version 120
 
+#include "lib/framebuffer.glsl"
+
 //Diffuse (color) texture.
 uniform sampler2D texture;
 //Lighting from day/night + shadows + light sources.
@@ -19,8 +21,7 @@ varying vec4 color;
 varying vec2 coord0;
 varying vec2 coord1;
 
-void main()
-{
+void main() {
     //Combine lightmap with blindness.
     vec3 light = (1.-blindness) * texture2D(lightmap,coord1).rgb;
     //Sample texture times lighting.
@@ -36,5 +37,5 @@ void main()
     col.rgb = mix(col.rgb, gl_Fog.color.rgb, fog);
 
     //Output the result.
-    gl_FragData[0] = col;
+    GCOLOR_OUT = col;
 }

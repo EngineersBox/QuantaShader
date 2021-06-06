@@ -13,8 +13,7 @@ varying vec4 color;
 varying vec2 coord0;
 varying vec2 coord1;
 
-void main()
-{
+void main() {
     //Calculate world space position.
     vec3 pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
     pos = (gbufferModelViewInverse * vec4(pos,1)).xyz;

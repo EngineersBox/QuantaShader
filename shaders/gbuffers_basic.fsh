@@ -1,6 +1,8 @@
 //Declare GL version.
 #version 120
 
+#include "lib/framebuffer.glsl"
+
 //0-1 amount of blindness.
 uniform float blindness;
 //0 = default, 1 = water, 2 = lava.
@@ -9,8 +11,7 @@ uniform int isEyeInWater;
 //Vertex color.
 varying vec4 color;
 
-void main()
-{
+void main() {
     vec4 col = color;
 
     //Calculate fog intensity in or out of water.
@@ -21,5 +22,5 @@ void main()
     col.rgb = mix(col.rgb, gl_Fog.color.rgb, fog);
 
     //Output the result.
-    gl_FragData[0] = col * vec4(vec3(1.-blindness),1);
+    GCOLOR_OUT = col * vec4(vec3(1.-blindness),1);
 }
