@@ -13,6 +13,7 @@ uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 uniform sampler2D shadowcolor0;
 uniform sampler2D depthtex0;
+uniform sampler2D noisetex;
 
 /*
 const int colortex0Format = RGBA16F;
@@ -27,6 +28,12 @@ uniform mat4 shadowProjection;
 
 const float sunPathRotation = -40.0f;
 const float ambient = 0.1f;
+const int shadowMapResolution = 2048;
+const int noiseTextureResolution = 64;
+
+#define SHADOW_SAMPLES 2
+const int shadowSamplesPerSize = 2 * SHADOW_SAMPLES + 1;
+const int totalSamples = shadowSamplesPerSize * shadowSamplesPerSize;
 
 float adjustLightmapTorch(in float torch) {
     const float K = 2.0f;
@@ -74,6 +81,7 @@ vec3 transparentShadow(in vec3 sampleCoord) {
     return mix(transmittedColor * shadowVisibility1, vec3(1.0f), shadowVisibility0);	
 }
 
+// TODO: Swap out PCF for Vogel or Poisson disk in spherical sampling
 vec3 getShadow(float depth) {
 	vec3 clipSpace = vec3(texCoord, depth) * 2.0f - 1.0f;
 	vec4 viewW = gbufferProjectionInverse * vec4(clipSpace, 1.0f);
@@ -82,7 +90,20 @@ vec3 getShadow(float depth) {
 	vec4 shadowSpace = shadowProjection * shadowModelView * world;
 	shadowSpace.xy = distortPosition(shadowSpace.xy);
 	vec3 sampleCoord = shadowSpace.xyz * 0.5f + 0.5f;
-	return transparentShadow(sampleCoord);
+	float randomAngle = texture2D(noisetex, texCoord * 20.0f).r * 100.0f;
+    float cosTheta = cos(randomAngle);
+	float sinTheta = sin(randomAngle);
+    mat2 rotation =  mat2(cosTheta, -sinTheta, sinTheta, cosTheta) / shadowMapResolution; // We can move our division by the shadow map resolution here for a small speedup
+    vec3 shadowAccum = vec3(0.0f);
+    for(int x = -SHADOW_SAMPLES; x <= SHADOW_SAMPLES; x++){
+        for(int y = -SHADOW_SAMPLES; y <= SHADOW_SAMPLES; y++){
+            vec2 offset = rotation * vec2(x, y);
+            vec3 currentSampleCoordinate = vec3(sampleCoord.xy + offset, sampleCoord.z);
+            shadowAccum += transparentShadow(currentSampleCoordinate);
+        }
+    }
+    shadowAccum /= totalSamples;
+    return shadowAccum;
 }
 
 void main(){
