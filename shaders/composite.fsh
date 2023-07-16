@@ -1,5 +1,7 @@
 #version 120
 
+#include "lib/distort.glsl"
+
 varying vec2 texCoord;
 
 uniform vec3 sunPosition;
@@ -8,6 +10,8 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D shadowtex0;
+uniform sampler2D shadowtex1;
+uniform sampler2D shadowcolor0;
 uniform sampler2D depthtex0;
 
 /*
@@ -58,14 +62,27 @@ vec3 getLightmapColor(in vec2 lightmap){
     return lightmapLighting;
 }
 
-float getShadow(float depth) {
+float visibility(in sampler2D shadowMap, in vec3 sampleCoord) {
+    return step(sampleCoord.z - 0.001f, texture2D(shadowMap, sampleCoord.xy).r);
+}
+
+vec3 transparentShadow(in vec3 sampleCoord) {
+	float shadowVisibility0 = visibility(shadowtex0, sampleCoord);
+    float shadowVisibility1 = visibility(shadowtex1, sampleCoord);
+    vec4 shadowColor0 = texture2D(shadowcolor0, sampleCoord.xy);
+    vec3 transmittedColor = shadowColor0.rgb * (1.0f - shadowColor0.a); // Perform a blend operation with the sun color
+    return mix(transmittedColor * shadowVisibility1, vec3(1.0f), shadowVisibility0);	
+}
+
+vec3 getShadow(float depth) {
 	vec3 clipSpace = vec3(texCoord, depth) * 2.0f - 1.0f;
 	vec4 viewW = gbufferProjectionInverse * vec4(clipSpace, 1.0f);
 	vec3 view = viewW.xyz / viewW.w;
 	vec4 world = gbufferModelViewInverse * vec4(view, 1.0f);
 	vec4 shadowSpace = shadowProjection * shadowModelView * world;
+	shadowSpace.xy = distortPosition(shadowSpace.xy);
 	vec3 sampleCoord = shadowSpace.xyz * 0.5f + 0.5f;
-	return step(sampleCoord.z - 0.001f, texture2D(shadowtex0, sampleCoord.xy).r);
+	return transparentShadow(sampleCoord);
 }
 
 void main(){
