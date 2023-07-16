@@ -27,6 +27,10 @@ vec3 getNormal(in vec2 coord) {
     return texture2D(gnormal, coord).rgb * 2.0 - 1.0;
 }
 
+vec3 getDepth(in vec2 coord) {
+    return texture2D(gdepth, coord).rgb;
+}
+
 float getEmission(in vec2 coord) {
     return texture2D(gdepth, coord).a;
 }
