@@ -1,19 +1,16 @@
 #version 120
 
-#include "lib/framebuffer.glsl"
-
+varying vec2 texCoord;
 varying vec3 normal;
-varying vec3 tintColor;
-varying vec2 coord0;
+varying vec4 color;
+varying vec2 lightmapCoord;
 
 uniform sampler2D texture;
 
-void main() {
-    vec4 blockColor = texture2D(texture, coord0);
-    blockColor.rgb *= tintColor;
-
-    GCOLOR_OUT = blockColor;
-    // Normals are within range -1 to 1, but we need zero centered unit normals.
-    // Do achieve this we multiple by 0.5 then add 0.5
-    GNORMAL_OUT = vec4(normal * 0.5 + 0.5, 1.0);
+void main(){
+    vec4 albedo = texture2D(texture, texCoord) * color;
+    /* DRAWBUFFERS:012 */
+    gl_FragData[0] = albedo;
+    gl_FragData[1] = vec4(normal * 0.5f + 0.5f, 1.0f);
+	gl_FragData[2] = vec4(lightmapCoord, 0.0f, 1.0f);
 }
